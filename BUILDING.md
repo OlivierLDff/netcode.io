@@ -105,9 +105,9 @@ More generally you can simply use cmake build command.
 ## Equivalent of make all for any generator
 cmake --build .
 ## Equivalent of "make netcode.io" in debug
-cmake --build . --target netcode.io -j32
+cmake --build . --target netcode.io
 ## Equivalent of "make netcode.io" in release
-cmake --build . --target netcode.io --config Release -j32
+cmake --build . --target netcode.io --config Release
 ```
 
 The `netcode.io` binary will be available in the `lib` folder of your build folder.
