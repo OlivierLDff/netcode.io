@@ -2,6 +2,8 @@
 
 # netcode.io
 
+*Aim of this fork is to add CMake build system to this library. Building instructions can be found inside [BUILDING.md](./BUILDING.md) file at CMake section.*
+
 **netcode.io** is a connection-oriented protocol built on top of UDP. 
 
 It's designed for use in client/server games with dedicated servers.
@@ -71,7 +73,7 @@ Other open source libraries by the same author include: [yojimbo](http://libyoji
 * **Bronze Sponsors**
     * [Kite & Lightning](http://kiteandlightning.la/)
     * [Data Realms](http://datarealms.com)
- 
+
 And by individual supporters on Patreon. Thank you. You made this possible!
 
 # License

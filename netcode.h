@@ -7,17 +7,17 @@
 
         1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-        2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer 
+        2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
            in the documentation and/or other materials provided with the distribution.
 
-        3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived 
+        3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived
            from this software without specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
@@ -26,6 +26,18 @@
 #define NETCODE_H
 
 #include <stdint.h>
+
+#ifdef _MSC_VER
+    #ifdef NETCODEIO_DLL_EXPORT  // Shared build
+        #define NETCODE_API_ __declspec(dllexport)
+    #elif NETCODEIO_STATIC   // No decoration when building statically
+        #define NETCODE_API_
+    #else               // Link to lib
+        #define NETCODE_API_ __declspec(dllimport)
+    #endif
+#else
+    #define NETCODE_API_
+#endif
 
 #if    defined(__386__) || defined(i386)    || defined(__i386__)  \
     || defined(__X86)   || defined(_M_IX86)                       \
@@ -96,9 +108,9 @@ extern "C" {
 #endif
 #endif
 
-int netcode_init();
+NETCODE_API_ int netcode_init();
 
-void netcode_term();
+NETCODE_API_ void netcode_term();
 
 struct netcode_address_t
 {
@@ -107,11 +119,11 @@ struct netcode_address_t
     uint8_t type;
 };
 
-int netcode_parse_address( NETCODE_CONST char * address_string_in, struct netcode_address_t * address );
+NETCODE_API_ int netcode_parse_address( NETCODE_CONST char * address_string_in, struct netcode_address_t * address );
 
-char * netcode_address_to_string( struct netcode_address_t * address, char * buffer );
+NETCODE_API_ char * netcode_address_to_string( struct netcode_address_t * address, char * buffer );
 
-int netcode_address_equal( struct netcode_address_t * a, struct netcode_address_t * b );
+NETCODE_API_ int netcode_address_equal( struct netcode_address_t * a, struct netcode_address_t * b );
 
 struct netcode_client_config_t
 {
@@ -127,55 +139,55 @@ struct netcode_client_config_t
     int (*receive_packet_override)(void*,struct netcode_address_t*,uint8_t*,int);
 };
 
-void netcode_default_client_config( struct netcode_client_config_t * config );
+NETCODE_API_ void netcode_default_client_config( struct netcode_client_config_t * config );
 
-struct netcode_client_t * netcode_client_create( NETCODE_CONST char * address, NETCODE_CONST struct netcode_client_config_t * config, double time );
+NETCODE_API_ struct netcode_client_t * netcode_client_create( NETCODE_CONST char * address, NETCODE_CONST struct netcode_client_config_t * config, double time );
 
-void netcode_client_destroy( struct netcode_client_t * client );
+NETCODE_API_ void netcode_client_destroy( struct netcode_client_t * client );
 
-void netcode_client_connect( struct netcode_client_t * client, uint8_t * connect_token );
+NETCODE_API_ void netcode_client_connect( struct netcode_client_t * client, uint8_t * connect_token );
 
-void netcode_client_update( struct netcode_client_t * client, double time );
+NETCODE_API_ void netcode_client_update( struct netcode_client_t * client, double time );
 
-uint64_t netcode_client_next_packet_sequence( struct netcode_client_t * client );
+NETCODE_API_ uint64_t netcode_client_next_packet_sequence( struct netcode_client_t * client );
 
-void netcode_client_send_packet( struct netcode_client_t * client, NETCODE_CONST uint8_t * packet_data, int packet_bytes );
+NETCODE_API_ void netcode_client_send_packet( struct netcode_client_t * client, NETCODE_CONST uint8_t * packet_data, int packet_bytes );
 
-uint8_t * netcode_client_receive_packet( struct netcode_client_t * client, int * packet_bytes, uint64_t * packet_sequence );
+NETCODE_API_ uint8_t * netcode_client_receive_packet( struct netcode_client_t * client, int * packet_bytes, uint64_t * packet_sequence );
 
-void netcode_client_free_packet( struct netcode_client_t * client, void * packet );
+NETCODE_API_ void netcode_client_free_packet( struct netcode_client_t * client, void * packet );
 
-void netcode_client_disconnect( struct netcode_client_t * client );
+NETCODE_API_ void netcode_client_disconnect( struct netcode_client_t * client );
 
-int netcode_client_state( struct netcode_client_t * client );
+NETCODE_API_ int netcode_client_state( struct netcode_client_t * client );
 
-int netcode_client_index( struct netcode_client_t * client );
+NETCODE_API_ int netcode_client_index( struct netcode_client_t * client );
 
-int netcode_client_max_clients( struct netcode_client_t * client );
+NETCODE_API_ int netcode_client_max_clients( struct netcode_client_t * client );
 
-void netcode_client_connect_loopback( struct netcode_client_t * client, int client_index, int max_clients );
+NETCODE_API_ void netcode_client_connect_loopback( struct netcode_client_t * client, int client_index, int max_clients );
 
-void netcode_client_disconnect_loopback( struct netcode_client_t * client );
+NETCODE_API_ void netcode_client_disconnect_loopback( struct netcode_client_t * client );
 
-void netcode_client_process_packet( struct netcode_client_t * client, struct netcode_address_t * from, uint8_t * packet_data, int packet_bytes );
+NETCODE_API_ void netcode_client_process_packet( struct netcode_client_t * client, struct netcode_address_t * from, uint8_t * packet_data, int packet_bytes );
 
-int netcode_client_loopback( struct netcode_client_t * client );
+NETCODE_API_ int netcode_client_loopback( struct netcode_client_t * client );
 
-void netcode_client_process_loopback_packet( struct netcode_client_t * client, NETCODE_CONST uint8_t * packet_data, int packet_bytes, uint64_t packet_sequence );
+NETCODE_API_ void netcode_client_process_loopback_packet( struct netcode_client_t * client, NETCODE_CONST uint8_t * packet_data, int packet_bytes, uint64_t packet_sequence );
 
-uint16_t netcode_client_get_port( struct netcode_client_t * client );
+NETCODE_API_ uint16_t netcode_client_get_port( struct netcode_client_t * client );
 
-struct netcode_address_t * netcode_client_server_address( struct netcode_client_t * client );
+NETCODE_API_ struct netcode_address_t * netcode_client_server_address( struct netcode_client_t * client );
 
-int netcode_generate_connect_token( int num_server_addresses, 
-                                    NETCODE_CONST char ** public_server_addresses, 
-                                    NETCODE_CONST char ** internal_server_addresses, 
+NETCODE_API_ int netcode_generate_connect_token( int num_server_addresses,
+                                    NETCODE_CONST char ** public_server_addresses,
+                                    NETCODE_CONST char ** internal_server_addresses,
                                     int expire_seconds,
-                                    int timeout_seconds, 
-                                    uint64_t client_id, 
-                                    uint64_t protocol_id, 
-                                    NETCODE_CONST uint8_t * private_key, 
-                                    uint8_t * user_data, 
+                                    int timeout_seconds,
+                                    uint64_t client_id,
+                                    uint64_t protocol_id,
+                                    NETCODE_CONST uint8_t * private_key,
+                                    uint8_t * user_data,
                                     uint8_t * connect_token );
 
 struct netcode_server_config_t
@@ -194,61 +206,61 @@ struct netcode_server_config_t
     int (*receive_packet_override)(void*,struct netcode_address_t*,uint8_t*,int);
 };
 
-void netcode_default_server_config( struct netcode_server_config_t * config );
+NETCODE_API_ void netcode_default_server_config( struct netcode_server_config_t * config );
 
-struct netcode_server_t * netcode_server_create( NETCODE_CONST char * server_address, NETCODE_CONST struct netcode_server_config_t * config, double time );
+NETCODE_API_ struct netcode_server_t * netcode_server_create( NETCODE_CONST char * server_address, NETCODE_CONST struct netcode_server_config_t * config, double time );
 
-void netcode_server_destroy( struct netcode_server_t * server );
+NETCODE_API_ void netcode_server_destroy( struct netcode_server_t * server );
 
-void netcode_server_start( struct netcode_server_t * server, int max_clients );
+NETCODE_API_ void netcode_server_start( struct netcode_server_t * server, int max_clients );
 
-void netcode_server_stop( struct netcode_server_t * server );
+NETCODE_API_ void netcode_server_stop( struct netcode_server_t * server );
 
-int netcode_server_running( struct netcode_server_t * server );
+NETCODE_API_ int netcode_server_running( struct netcode_server_t * server );
 
-int netcode_server_max_clients( struct netcode_server_t * server );
+NETCODE_API_ int netcode_server_max_clients( struct netcode_server_t * server );
 
-void netcode_server_update( struct netcode_server_t * server, double time );
+NETCODE_API_ void netcode_server_update( struct netcode_server_t * server, double time );
 
-int netcode_server_client_connected( struct netcode_server_t * server, int client_index );
+NETCODE_API_ int netcode_server_client_connected( struct netcode_server_t * server, int client_index );
 
-uint64_t netcode_server_client_id( struct netcode_server_t * server, int client_index );
+NETCODE_API_ uint64_t netcode_server_client_id( struct netcode_server_t * server, int client_index );
 
-struct netcode_address_t * netcode_server_client_address( struct netcode_server_t * server, int client_index );
+NETCODE_API_ struct netcode_address_t * netcode_server_client_address( struct netcode_server_t * server, int client_index );
 
-void netcode_server_disconnect_client( struct netcode_server_t * server, int client_index );
+NETCODE_API_ void netcode_server_disconnect_client( struct netcode_server_t * server, int client_index );
 
-void netcode_server_disconnect_all_clients( struct netcode_server_t * server );
+NETCODE_API_ void netcode_server_disconnect_all_clients( struct netcode_server_t * server );
 
-uint64_t netcode_server_next_packet_sequence( struct netcode_server_t * server, int client_index );
+NETCODE_API_ uint64_t netcode_server_next_packet_sequence( struct netcode_server_t * server, int client_index );
 
-void netcode_server_send_packet( struct netcode_server_t * server, int client_index, NETCODE_CONST uint8_t * packet_data, int packet_bytes );
+NETCODE_API_ void netcode_server_send_packet( struct netcode_server_t * server, int client_index, NETCODE_CONST uint8_t * packet_data, int packet_bytes );
 
-uint8_t * netcode_server_receive_packet( struct netcode_server_t * server, int client_index, int * packet_bytes, uint64_t * packet_sequence );
+NETCODE_API_ uint8_t * netcode_server_receive_packet( struct netcode_server_t * server, int client_index, int * packet_bytes, uint64_t * packet_sequence );
 
-void netcode_server_free_packet( struct netcode_server_t * server, void * packet );
+NETCODE_API_ void netcode_server_free_packet( struct netcode_server_t * server, void * packet );
 
-int netcode_server_num_connected_clients( struct netcode_server_t * server );
+NETCODE_API_ int netcode_server_num_connected_clients( struct netcode_server_t * server );
 
-void * netcode_server_client_user_data( struct netcode_server_t * server, int client_index );
+NETCODE_API_ void * netcode_server_client_user_data( struct netcode_server_t * server, int client_index );
 
-void netcode_server_process_packet( struct netcode_server_t * server, struct netcode_address_t * from, uint8_t * packet_data, int packet_bytes );
+NETCODE_API_ void netcode_server_process_packet( struct netcode_server_t * server, struct netcode_address_t * from, uint8_t * packet_data, int packet_bytes );
 
-void netcode_server_connect_loopback_client( struct netcode_server_t * server, int client_index, uint64_t client_id, NETCODE_CONST uint8_t * user_data );
+NETCODE_API_ void netcode_server_connect_loopback_client( struct netcode_server_t * server, int client_index, uint64_t client_id, NETCODE_CONST uint8_t * user_data );
 
-void netcode_server_disconnect_loopback_client( struct netcode_server_t * server, int client_index );
+NETCODE_API_ void netcode_server_disconnect_loopback_client( struct netcode_server_t * server, int client_index );
 
-int netcode_server_client_loopback( struct netcode_server_t * server, int client_index );
+NETCODE_API_ int netcode_server_client_loopback( struct netcode_server_t * server, int client_index );
 
-void netcode_server_process_loopback_packet( struct netcode_server_t * server, int client_index, NETCODE_CONST uint8_t * packet_data, int packet_bytes, uint64_t packet_sequence );
+NETCODE_API_ void netcode_server_process_loopback_packet( struct netcode_server_t * server, int client_index, NETCODE_CONST uint8_t * packet_data, int packet_bytes, uint64_t packet_sequence );
 
-uint16_t netcode_server_get_port( struct netcode_server_t * server );
+NETCODE_API_ uint16_t netcode_server_get_port( struct netcode_server_t * server );
 
-void netcode_log_level( int level );
+NETCODE_API_ void netcode_log_level( int level );
 
-void netcode_set_printf_function( int (*function)( NETCODE_CONST char *, ... ) );
+NETCODE_API_ void netcode_set_printf_function( int (*function)( NETCODE_CONST char *, ... ) );
 
-extern void (*netcode_assert_function)( NETCODE_CONST char *, NETCODE_CONST char *, NETCODE_CONST char * file, int line );
+NETCODE_API_ extern void (*netcode_assert_function)( NETCODE_CONST char *, NETCODE_CONST char *, NETCODE_CONST char * file, int line );
 
 #ifndef NDEBUG
 #define netcode_assert( condition )                                                         \
@@ -264,16 +276,18 @@ do                                                                              
 #define netcode_assert( ignore ) ((void)0)
 #endif
 
-void netcode_set_assert_function( void (*function)( NETCODE_CONST char * /*condition*/, 
-                                  NETCODE_CONST char * /*function*/, 
-                                  NETCODE_CONST char * /*file*/, 
+NETCODE_API_ void netcode_set_assert_function( void (*function)( NETCODE_CONST char * /*condition*/,
+                                  NETCODE_CONST char * /*function*/,
+                                  NETCODE_CONST char * /*file*/,
                                   int /*line*/ ) );
 
-void netcode_random_bytes( uint8_t * data, int bytes );
+NETCODE_API_ void netcode_random_bytes( uint8_t * data, int bytes );
 
-void netcode_sleep( double seconds );
+NETCODE_API_ void netcode_sleep( double seconds );
 
-double netcode_time();
+NETCODE_API_ double netcode_time();
+
+NETCODE_API_ extern void netcode_test();
 
 #ifdef __cplusplus
 }

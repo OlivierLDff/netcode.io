@@ -22,10 +22,14 @@
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef NETCODE_CMAKE_TEST
 #define NETCODE_ENABLE_TESTS 1
+#endif
 
 #include "netcode.h"
+#ifndef NETCODE_CMAKE_TEST
 #include "netcode.c"
+#endif // STATIC_TEST
 #include <stdio.h>
 #include <assert.h>
 
