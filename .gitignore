@@ -26,12 +26,20 @@ Makefile
 bin
 obj
 ipch
-release
-Release
-Debug
+[Rr]elease
+[Dd]ebug
 .vs
 cov-int
 c/docker/netcode.io
 c/valgrind/netcode.io
 docs
 *.exe
+
+# Allow in source build
+[Bb]uild*/
+# Ignore qt files when importing CMakeLists
+*.users
+# Ignore CLion project files
+*.idea
+# For macOs users
+.DS_Store
