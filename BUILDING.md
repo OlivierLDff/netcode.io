@@ -72,30 +72,30 @@ The `CMakeLists.txt` comes with multiples options for you to override when execu
 
 CMake support multiple options.
 
-- **NETCODEIO_TARGET**: The name of the target that will be generated. *Default "netcode.io"*.
-- **NETCODEIO_BUILD_SHARED**: Build a shared library. *Default "OFF". [ON/OFF]*.
-- **NETCODEIO_FOLDER_PREFIX**: Prefix folder for all netcode.io generated targets in generated project (only decorative). *Default "netcode.io".*
-- **NETCODEIO_ENABLE_TESTS**: Enable the tests. This will create a target `${NETCODEIO_TESTS_PREFIX}_test`. *Default "OFF". [ON/OFF]*.
-- **NETCODEIO_TESTS_PREFIX**: Prefix for every tests to avoid naming clashes in superbuild. *Default "netcode.io".*
-- **NETCODEIO_ENABLE_EXAMPLES**: Enable examples. This will create a target for each examples. *Default "OFF". [ON/OFF]*.
-  - `${NETCODEIO_EXAMPLES_PREFIX}soak`: Run a continuous client/server communication with typical production load.
-  - `${NETCODEIO_EXAMPLES_PREFIX}profile`
-  - `${NETCODEIO_EXAMPLES_PREFIX}client`: Run a netcode.io client that connects to the server running on localhost
-  - `${NETCODEIO_EXAMPLES_PREFIX}server`: Run a netcode.io server on localhost on UDP port 40000.
-  - `${NETCODEIO_EXAMPLES_PREFIX}client_server`: Run a client and a server and test packet exchange.
-- **NETCODEIO_EXAMPLES_PREFIX**: Prefix for every examples to avoid naming clashes in superbuild. *Default "netcode.io".*
-- **NETCODEIO_ENABLE_INSTALL**: Enable install target. *Default "OFF". [ON/OFF]*.
-- **NETCODEIO_INSTALL_PREFIX**: Folder for all netcode.io headers in the install folder. *Default "netcode.io".*
+- **NETCODE_TARGET**: The name of the target that will be generated. *Default "netcode"*.
+- **NETCODE_BUILD_SHARED**: Build a shared library. *Default "OFF". [ON/OFF]*.
+- **NETCODE_FOLDER_PREFIX**: Prefix folder for all netcode.io generated targets in generated project (only decorative). *Default "netcode".*
+- **NETCODE_ENABLE_TESTS**: Enable the tests. This will create a target `${NETCODE_TESTS_PREFIX}_test`. *Default "OFF". [ON/OFF]*.
+- **NETCODE_TESTS_PREFIX**: Prefix for every tests to avoid naming clashes in superbuild. *Default "netcode".*
+- **NETCODE_ENABLE_EXAMPLES**: Enable examples. This will create a target for each examples. *Default "OFF". [ON/OFF]*.
+  - `${NETCODE_EXAMPLES_PREFIX}soak`: Run a continuous client/server communication with typical production load.
+  - `${NETCODE_EXAMPLES_PREFIX}profile`
+  - `${NETCODE_EXAMPLES_PREFIX}client`: Run a netcode.io client that connects to the server running on localhost
+  - `${NETCODE_EXAMPLES_PREFIX}server`: Run a netcode.io server on localhost on UDP port 40000.
+  - `${NETCODE_EXAMPLES_PREFIX}client_server`: Run a client and a server and test packet exchange.
+- **NETCODE_EXAMPLES_PREFIX**: Prefix for every examples to avoid naming clashes in superbuild. *Default "netcode".*
+- **NETCODE_ENABLE_INSTALL**: Enable install target. *Default "OFF". [ON/OFF]*.
+- **NETCODE_INSTALL_PREFIX**: Folder for all netcode.io headers in the install folder. *Default "netcode".*
 
 If you want to enable everything:
 
 ```bash
 cmake                               \
-  -DNETCODEIO_BUILD_SHARED=OFF      \
-  -DNETCODEIO_TARGET="netcode.io"   \
-  -DNETCODEIO_ENABLE_TESTS=ON       \
-  -DNETCODEIO_ENABLE_EXAMPLES=ON    \
-  -DNETCODEIO_ENABLE_INSTALL=ON     \
+  -DNETCODE_BUILD_SHARED=OFF      \
+  -DNETCODE_TARGET="netcode"   \
+  -DNETCODE_ENABLE_TESTS=ON       \
+  -DNETCODE_ENABLE_EXAMPLES=ON    \
+  -DNETCODE_ENABLE_INSTALL=ON     \
   ..
 ```
 
@@ -119,11 +119,11 @@ More generally you can simply use cmake build command.
 ```bash
 ## Equivalent of make all for any generator
 cmake --build .
-## Equivalent of "make netcode.io" in release mode
-cmake --build . --target netcode.io --config Release
+## Equivalent of "make netcode" in release mode
+cmake --build . --target netcode --config Release
 ```
 
-The `netcode.io` binary will be available in the `lib` folder of your build folder.
+The `netcode` binary will be available in the `lib` folder of your build folder.
 
 ### Install
 
@@ -131,14 +131,14 @@ An install target is available for convenience and will deploy netcode.io on you
 
 ```bash
 ## Specifify a custom install folder (optionnal)
-cmake -DNETCODEIO_ENABLE_INSTALL=ON -DCMAKE_INSTALL_PREFIX="/path/to/my/install/dir" ..
+cmake -DNETCODE_ENABLE_INSTALL=ON -DCMAKE_INSTALL_PREFIX="/path/to/my/install/dir" ..
 ## Equivalent of "make install" (Debug)
 cmake --build . --target install --config Debug
 ## Equivalent of "make install" (Release)
 cmake --build . --target install --config Release
 ```
 
-You can choose the install directory by setting **CMAKE_INSTALL_PREFIX** when configuring the project. By default on Unix system it is set to `/usr/local` and on Windows to `c:/Program Files/netcode.io`.
+You can choose the install directory by setting **CMAKE_INSTALL_PREFIX** when configuring the project. By default on Unix system it is set to `/usr/local` and on Windows to `c:/Program Files/netcode`.
 
 In this folder you will find an include folder ready to be included by another application. This is a copy of the `include` folder of this repository. A `lib` will be created with all the generated libraries. A `cmake` folder contain all the CMake scripts to find the package.
 
@@ -150,7 +150,7 @@ To run the tests you need to compile the library as static, and set the `NETCODE
 
 ```bash
 ## Enable the tests
-cmake -DNETCODEIO_ENABLE_TESTS=ON ..
+cmake -DNETCODE_ENABLE_TESTS=ON ..
 ## Build all the tests and executables
 cmake --build . --config Release
 # Then run the tests

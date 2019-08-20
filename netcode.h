@@ -28,9 +28,9 @@
 #include <stdint.h>
 
 #ifdef _MSC_VER
-    #ifdef NETCODEIO_DLL_EXPORT  // Shared build
+    #ifdef NETCODE_DLL_EXPORT  // Shared build
         #define NETCODE_API_ __declspec(dllexport)
-    #elif NETCODEIO_STATIC   // No decoration when building statically
+    #elif NETCODE_STATIC   // No decoration when building statically
         #define NETCODE_API_
     #else               // Link to lib
         #define NETCODE_API_ __declspec(dllimport)
