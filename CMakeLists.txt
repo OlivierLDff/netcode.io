@@ -14,7 +14,7 @@
 # │                       CMAKE PROPERTIES                           │
 # └──────────────────────────────────────────────────────────────────┘
 
-CMAKE_MINIMUM_REQUIRED( VERSION 3.1.0 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.11 )
 
 # DEPENDANCIES
 
@@ -58,59 +58,40 @@ MESSAGE("                                                     ")
 # │                       DEPENDENCIES                               │
 # └──────────────────────────────────────────────────────────────────┘
 
-# LIB SODIUM
+include(FetchContent)
 
-IF(SODIUM_TARGET AND NOT NETCODE_DOWNLOAD_SODIUM)
-    MESSAGE( STATUS "Found ${SODIUM_TARGET} v${SODIUM_VERSION}" )
-ELSE(SODIUM_TARGET AND NOT NETCODE_DOWNLOAD_SODIUM)
-    SET(NETCODE_DOWNLOAD_SODIUM ON CACHE BOOL "libsodium is going to be downloaded and build as a part of ${NETCODEIO_PROJECT}" FORCE)
-    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildSodium.cmake)
-    IF(NOT SODIUM_TARGET)
-        MESSAGE( FATAL_ERROR "Fail to configure libsodium Library" )
-    ENDIF(NOT SODIUM_TARGET)
-ENDIF(SODIUM_TARGET AND NOT NETCODE_DOWNLOAD_SODIUM)
+# LIB SODIUM
+FetchContent_Declare(
+    libsodium
+    GIT_REPOSITORY ${SODIUM_REPOSITORY}
+    GIT_TAG        ${SODIUM_TAG}
+)
+
+# Make all dependancies avaiables
+FetchContent_MakeAvailable(libsodium)
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │                          NETCODE.IO                              │
 # └──────────────────────────────────────────────────────────────────┘
 
 # NETCODE SOURCES
-
 SET(NETCODEIO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/netcode.c)
 SET(NETCODEIO_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/netcode.h)
 
 # NETCODE.IO TARGET
-
 IF(NETCODEIO_BUILD_SHARED)
-    MESSAGE(STATUS "Build shared ${NETCODEIO_TARGET}")
-    IF( MSVC )
-    INCLUDE (GenerateExportHeader)
-    ENDIF( MSVC )
 
+    TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PRIVATE "-DNETCODEIO_DLL_EXPORT")
     ADD_LIBRARY(${NETCODEIO_TARGET} SHARED ${NETCODEIO_SOURCES} ${NETCODEIO_HEADERS})
 
-    IF( MSVC )
-    GENERATE_EXPORT_HEADER( ${NETCODEIO_TARGET}
-        BASE_NAME ${NETCODEIO_TARGET}
-        EXPORT_MACRO_NAME ${NETCODEIO_TARGET}_EXPORT
-        EXPORT_FILE_NAME ${NETCODEIO_TARGET}_Export.h
-        STATIC_DEFINE ${NETCODEIO_TARGET}_BUILT_AS_STATIC
-    )
-    ENDIF( MSVC )
-    TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PRIVATE "-DNETCODEIO_DLL_EXPORT")
 ELSE(NETCODEIO_BUILD_SHARED)
-    MESSAGE(STATUS "Build static ${NETCODEIO_TARGET}")
-    ADD_DEFINITIONS("-DNETCODEIO_STATIC")
+
     ADD_LIBRARY(${NETCODEIO_TARGET} STATIC  ${NETCODEIO_SOURCES} ${NETCODEIO_HEADERS})
+    TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PUBLIC "-DNETCODEIO_STATIC")
+
 ENDIF(NETCODEIO_BUILD_SHARED)
 
-# Output directory
-#[[SET_TARGET_PROPERTIES(${NETCODEIO_TARGET} PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
-    PROJECT_LABEL "${NETCODEIO_TARGET}"
-)]]
-
+# Set include directory
 TARGET_INCLUDE_DIRECTORIES(${NETCODEIO_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:netcode.io>)
 
 # Avoid libnetcode.io on darwin for example.
@@ -123,15 +104,20 @@ TARGET_LINK_LIBRARIES(${NETCODEIO_TARGET} m ${SODIUM_TARGET})
 
 IF(NETCODEIO_ENABLE_TESTS)
 
+    # Because tests are in the netcode.c file, the target needs to enable the tests at build time to correctly define symbols
     TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PRIVATE "-DNETCODE_ENABLE_TESTS")
 
     ENABLE_TESTING()
 
+    # Add a test executable. We can't name it test, it's forbidden by cmake system.
     ADD_EXECUTABLE            (netcode_test     test.cpp)
     TARGET_LINK_LIBRARIES     (netcode_test     ${NETCODEIO_TARGET})
     SET_TARGET_PROPERTIES     (netcode_test     PROPERTIES FOLDER Tests)
+
+    # Little trick in order to avoid the #include <netcode.c> in test.c. This is done in order to make sure premake build remain untouched
     TARGET_COMPILE_DEFINITIONS(netcode_test     PRIVATE "-DNETCODE_CMAKE_TEST")
 
+    # Create the test
     ADD_TEST(NAME netcode_test                  COMMAND netcode_test)
 
 ENDIF(NETCODEIO_ENABLE_TESTS)
