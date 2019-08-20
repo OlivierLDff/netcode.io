@@ -31,7 +31,7 @@ SET( SODIUM_TAG "master" CACHE STRING "Git Tag of libsodium" )
 # General
 SET( NETCODE_PROJECT "netcode" CACHE STRING "Project Name")
 SET( NETCODE_TARGET ${NETCODE_PROJECT} CACHE STRING "netcode.io library name" )
-SET( NETCODE_VERSION "1.02" CACHE STRING "netcode.io current version, this is only decorative and will not configure any files" FORCE )
+SET( NETCODE_VERSION "1.2.1" CACHE STRING "netcode.io current version, this is only decorative and will not configure any files" FORCE )
 SET( NETCODE_BUILD_SHARED OFF CACHE BOOL "Build as a shared library (ON) or as static (OFF)" )
 SET( NETCODE_FOLDER_PREFIX ${NETCODE_PROJECT} CACHE STRING "Prefix folder for all netcode.io generated targets in generated project (only decorative)" )
 
