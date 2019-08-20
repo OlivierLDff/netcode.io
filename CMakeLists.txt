@@ -1,13 +1,14 @@
 #
 #   netcode.io CMake build script
 #
+#   Copyright Olivier Le Doeuff 2019
+#
 #   Revision:
 #   - Olivier Le Doeuff [19/08/2019] : Initial work
 #       - netcode.io static or shared library build (NETCODEIO_BUILD_SHARED)
-#       - Build libsodium dependancies when SODIUM_TARGET isn't specified
 #       - Test integration with ctest (NETCODEIO_ENABLE_TESTS)
 #       - Generate examples (NETCODEIO_ENABLE_EXAMPLES)
-#       - Install netcode.io (target install)
+#       - Install netcode.io (NETCODEIO_ENABLE_INSTALL)
 #
 
 # ┌──────────────────────────────────────────────────────────────────┐
@@ -18,7 +19,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.11 )
 
 # DEPENDANCIES
 
-SET( SODIUM_REPOSITORY "https://github.com/OlivierLdff/libsodium.git" CACHE STRING "Repository of libsodium" )
+SET( SODIUM_REPOSITORY "https://github.com/OlivierLDff/libsodium" CACHE STRING "Repository of libsodium" )
 SET( SODIUM_TAG "master" CACHE STRING "Git Tag of libsodium" )
 
 # ┌──────────────────────────────────────────────────────────────────┐
@@ -27,12 +28,24 @@ SET( SODIUM_TAG "master" CACHE STRING "Git Tag of libsodium" )
 
 # OPTIONS
 
+# General
 SET( NETCODEIO_PROJECT "netcode.io" CACHE STRING "Project Name")
-SET( NETCODEIO_TARGET "netcode.io" CACHE STRING "netcode.io library name" )
+SET( NETCODEIO_TARGET ${NETCODEIO_PROJECT} CACHE STRING "netcode.io library name" )
 SET( NETCODEIO_VERSION "1.02" CACHE STRING "netcode.io current version, this is only decorative and will not configure any files" FORCE )
 SET( NETCODEIO_BUILD_SHARED OFF CACHE BOOL "Build as a shared library (ON) or as static (OFF)" )
+SET( NETCODEIO_FOLDER_PREFIX ${NETCODEIO_PROJECT} CACHE STRING "Prefix folder for all netcode.io generated targets in generated project (only decorative)" )
+
+# Tests
 SET( NETCODEIO_ENABLE_TESTS OFF CACHE BOOL "Create or not a target for test (compatible with CTests)" )
+SET( NETCODEIO_TESTS_PREFIX ${NETCODEIO_PROJECT} CACHE STRING "Prefix for all netcode tests" )
+
+# Examples
 SET( NETCODEIO_ENABLE_EXAMPLES OFF CACHE BOOL "Create or not a target for examples" )
+SET( NETCODEIO_EXAMPLES_PREFIX ${NETCODEIO_PROJECT} CACHE STRING "Prefix for all netcode tests" )
+
+# Install
+SET( NETCODEIO_ENABLE_INSTALL OFF CACHE BOOL "Create or not a target for install" )
+SET( NETCODEIO_INSTALL_PREFIX ${NETCODEIO_PROJECT} CACHE STRING "Prefix for all netcode headers in the install folder" )
 
 # CREATE PROJECT
 
@@ -44,12 +57,30 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 MESSAGE("---------------- NETCODE.IO OPTIONS. ----------------")
 
-MESSAGE(STATUS "NETCODEIO_PROJECT         : " ${NETCODEIO_PROJECT})
-MESSAGE(STATUS "NETCODEIO_TARGET          : " ${NETCODEIO_TARGET})
-MESSAGE(STATUS "NETCODEIO_VERSION         : " ${NETCODEIO_VERSION})
-MESSAGE(STATUS "NETCODEIO_BUILD_SHARED    : " ${NETCODEIO_BUILD_SHARED})
-MESSAGE(STATUS "NETCODEIO_ENABLE_TESTS    : " ${NETCODEIO_ENABLE_TESTS})
-MESSAGE(STATUS "NETCODEIO_ENABLE_EXAMPLES : " ${NETCODEIO_ENABLE_TESTS})
+#General
+MESSAGE(STATUS "NETCODEIO_PROJECT          : " ${NETCODEIO_PROJECT})
+MESSAGE(STATUS "NETCODEIO_TARGET           : " ${NETCODEIO_TARGET})
+MESSAGE(STATUS "NETCODEIO_VERSION          : " ${NETCODEIO_VERSION})
+MESSAGE(STATUS "NETCODEIO_BUILD_SHARED     : " ${NETCODEIO_BUILD_SHARED})
+MESSAGE(STATUS "NETCODEIO_FOLDER_PREFIX    : " ${NETCODEIO_FOLDER_PREFIX})
+
+# Tests
+MESSAGE(STATUS "NETCODEIO_ENABLE_TESTS     : " ${NETCODEIO_ENABLE_TESTS})
+IF(NETCODEIO_ENABLE_TESTS)
+MESSAGE(STATUS "NETCODEIO_TESTS_PREFIX     : " ${NETCODEIO_TESTS_PREFIX})
+ENDIF(NETCODEIO_ENABLE_TESTS)
+
+# Examples
+MESSAGE(STATUS "NETCODEIO_ENABLE_EXAMPLES  : " ${NETCODEIO_ENABLE_EXAMPLES})
+IF(NETCODEIO_ENABLE_EXAMPLES)
+MESSAGE(STATUS "NETCODEIO_EXAMPLES_PREFIX  : " ${NETCODEIO_EXAMPLES_PREFIX})
+ENDIF(NETCODEIO_ENABLE_EXAMPLES)
+
+# Install
+MESSAGE(STATUS "NETCODEIO_ENABLE_INSTALL   : " ${NETCODEIO_ENABLE_INSTALL})
+IF(NETCODEIO_ENABLE_INSTALL)
+MESSAGE(STATUS "NETCODEIO_INSTALL_PREFIX   : " ${NETCODEIO_INSTALL_PREFIX})
+ENDIF(NETCODEIO_ENABLE_INSTALL)
 
 MESSAGE("---------------- DONE WITH OPTIONS. -----------------")
 MESSAGE("                                                     ")
@@ -60,12 +91,15 @@ MESSAGE("                                                     ")
 
 include(FetchContent)
 
-# LIB SODIUM
+# libsodium
 FetchContent_Declare(
     libsodium
     GIT_REPOSITORY ${SODIUM_REPOSITORY}
     GIT_TAG        ${SODIUM_TAG}
 )
+
+SET(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+SET(FETCHCONTENT_QUIET OFF)
 
 # Make all dependancies avaiables
 FetchContent_MakeAvailable(libsodium)
@@ -92,34 +126,27 @@ ELSE(NETCODEIO_BUILD_SHARED)
 ENDIF(NETCODEIO_BUILD_SHARED)
 
 # Set include directory
-TARGET_INCLUDE_DIRECTORIES(${NETCODEIO_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:netcode.io>)
+TARGET_INCLUDE_DIRECTORIES(${NETCODEIO_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:${NETCODEIO_INSTALL_PREFIX}>)
 
 # Avoid libnetcode.io on darwin for example.
 SET_TARGET_PROPERTIES(${NETCODEIO_TARGET} PROPERTIES PREFIX "")
-TARGET_LINK_LIBRARIES(${NETCODEIO_TARGET} m ${SODIUM_TARGET})
+
+# Link to sodium library
+TARGET_LINK_LIBRARIES(${NETCODEIO_TARGET} ${SODIUM_TARGET})
+
+SET_TARGET_PROPERTIES(${NETCODEIO_TARGET} PROPERTIES FOLDER ${NETCODEIO_FOLDER_PREFIX})
+
+# Link to math library when not using msvc
+IF(NOT MSVC)
+    TARGET_LINK_LIBRARIES(${NETCODEIO_TARGET} m)
+ENDIF(NOT MSVC)
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │                           TESTS                                  │
 # └──────────────────────────────────────────────────────────────────┘
 
 IF(NETCODEIO_ENABLE_TESTS)
-
-    # Because tests are in the netcode.c file, the target needs to enable the tests at build time to correctly define symbols
-    TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PRIVATE "-DNETCODE_ENABLE_TESTS")
-
-    ENABLE_TESTING()
-
-    # Add a test executable. We can't name it test, it's forbidden by cmake system.
-    ADD_EXECUTABLE            (netcode_test     test.cpp)
-    TARGET_LINK_LIBRARIES     (netcode_test     ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES     (netcode_test     PROPERTIES FOLDER Tests)
-
-    # Little trick in order to avoid the #include <netcode.c> in test.c. This is done in order to make sure premake build remain untouched
-    TARGET_COMPILE_DEFINITIONS(netcode_test     PRIVATE "-DNETCODE_CMAKE_TEST")
-
-    # Create the test
-    ADD_TEST(NAME netcode_test                  COMMAND netcode_test)
-
+    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CTestLists.txt)
 ENDIF(NETCODEIO_ENABLE_TESTS)
 
 # ┌──────────────────────────────────────────────────────────────────┐
@@ -128,116 +155,30 @@ ENDIF(NETCODEIO_ENABLE_TESTS)
 
 IF(NETCODEIO_ENABLE_EXAMPLES)
 
-    ADD_EXECUTABLE       (soak                  soak.c)
-    TARGET_LINK_LIBRARIES(soak                  ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES(soak                  PROPERTIES FOLDER Examples)
+    MACRO(NETCODDEIO_ADD_EXAMPLE EXAMPLE_NAME)
 
-    ADD_EXECUTABLE       (profile               profile.c)
-    TARGET_LINK_LIBRARIES(profile               ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES(profile               PROPERTIES FOLDER Examples)
+        SET(EXAMPLE_FULL_NAME ${NETCODEIO_EXAMPLES_PREFIX}_${EXAMPLE_NAME})
 
-    ADD_EXECUTABLE       (client                client.c)
-    TARGET_LINK_LIBRARIES(client                ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES(client                PROPERTIES FOLDER Examples)
+        MESSAGE(STATUS "Add Example: ${EXAMPLE_FULL_NAME}")
 
-    ADD_EXECUTABLE       (server                server.c)
-    TARGET_LINK_LIBRARIES(server                ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES(server                PROPERTIES FOLDER Examples)
+        ADD_EXECUTABLE       (${EXAMPLE_FULL_NAME} ${EXAMPLE_NAME}.c)
+        TARGET_LINK_LIBRARIES(${EXAMPLE_FULL_NAME} ${NETCODEIO_TARGET})
+        SET_TARGET_PROPERTIES(${EXAMPLE_FULL_NAME} PROPERTIES FOLDER ${NETCODEIO_FOLDER_PREFIX}/Examples)
 
-    ADD_EXECUTABLE       (client_server         client_server.c)
-    TARGET_LINK_LIBRARIES(client_server         ${NETCODEIO_TARGET})
-    SET_TARGET_PROPERTIES(client_server         PROPERTIES FOLDER Examples)
+    ENDMACRO()
+
+    NETCODDEIO_ADD_EXAMPLE(soak)
+    NETCODDEIO_ADD_EXAMPLE(profile)
+    NETCODDEIO_ADD_EXAMPLE(client)
+    NETCODDEIO_ADD_EXAMPLE(server)
+    NETCODDEIO_ADD_EXAMPLE(client_server)
 
 ENDIF(NETCODEIO_ENABLE_EXAMPLES)
 
-####
+# ┌──────────────────────────────────────────────────────────────────┐
+# │                         INSTALL                                  │
+# └──────────────────────────────────────────────────────────────────┘
 
-# Layout. This works for all platforms:
-#   * <prefix>/lib/cmake/<PROJECT-NAME>
-#   * <prefix>/lib/
-#   * <prefix>/include/
-set(config_install_dir "lib/cmake/${PROJECT_NAME}")
-set(include_install_dir "include")
-
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-# Configuration
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(targets_export_name "${PROJECT_NAME}Targets")
-set(namespace "${PROJECT_NAME}::")
-
-# Include module with fuction 'write_basic_package_version_file'
-include(CMakePackageConfigHelpers)
-
-# Configure '<PROJECT-NAME>ConfigVersion.cmake'
-# Note: PROJECT_VERSION is used as a VERSION
-write_basic_package_version_file(
-    "${version_config}" COMPATIBILITY SameMajorVersion
-)
-
-# Configure '<PROJECT-NAME>Config.cmake'
-# Use variables:
-#   * targets_export_name
-#   * PROJECT_NAME
-MESSAGE(STATUS "Configure Config.cmake.in file located in ${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in"
-    "${project_config}"
-    INSTALL_DESTINATION "${config_install_dir}"
-)
-
-# Targets:
-#   * <prefix>/lib/libbar.a
-#   * <prefix>/lib/libbaz.a
-#   * header location after install: <prefix>/include/foo/Bar.hpp
-#   * headers can be included by C++ code `#include <foo/Bar.hpp>`
-install(
-    TARGETS ${NETCODEIO_TARGET}
-    EXPORT "${targets_export_name}"
-    LIBRARY DESTINATION "lib"
-    ARCHIVE DESTINATION "lib"
-    RUNTIME DESTINATION "bin"
-    INCLUDES DESTINATION "${include_install_dir}"
-)
-
-#install(TARGETS libsodium DESTINATION ".")
-
-add_custom_command(
-        TARGET ${NETCODEIO_TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_SOURCE_DIR}/netcode.h
-                ${CMAKE_CURRENT_BINARY_DIR}/include/netcode.io/netcode.h)
-
-# Headers:
-#   * Source/foo/Bar.hpp -> <prefix>/include/foo/Bar.hpp
-#   * Source/foo/Baz.hpp -> <prefix>/include/foo/Baz.hpp
-install(
-    DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/netcode.io"
-    DESTINATION "${include_install_dir}"
-    FILES_MATCHING PATTERN "*.h"
-)
-
-# Export headers:
-#   ${NETCODEIO_HEADERS}
-#install(
-#    FILES
-#        ${NETCODEIO_HEADERS}
-#    DESTINATION "${include_install_dir}"
-#)
-
-# Config
-#   * <prefix>/lib/cmake/Foo/FooConfig.cmake
-#   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-install(
-    FILES "${project_config}" "${version_config}"
-    DESTINATION "${config_install_dir}"
-)
-
-# Config
-#   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-install(
-    EXPORT "${targets_export_name}"
-    NAMESPACE "${namespace}"
-    DESTINATION "${config_install_dir}"
-)
+IF(NETCODEIO_ENABLE_INSTALL)
+    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CInstallLists.txt)
+ENDIF(NETCODEIO_ENABLE_INSTALL)

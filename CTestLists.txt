@@ -1,0 +1,30 @@
+#
+#   netcode.io CTest script
+#
+#   Copyright Olivier Le Doeuff 2019
+#
+
+MACRO(NETCODDEIO_ADD_TEST TEST_NAME)
+
+    SET(TEST_FULL_NAME ${NETCODEIO_TESTS_PREFIX}_${TEST_NAME})
+
+    MESSAGE(STATUS "Add CTest: ${TEST_FULL_NAME}")
+
+    # Create the executable
+    ADD_EXECUTABLE       (${TEST_FULL_NAME} ${TEST_NAME}.cpp)
+    TARGET_LINK_LIBRARIES(${TEST_FULL_NAME} ${NETCODEIO_TARGET})
+    SET_TARGET_PROPERTIES(${TEST_FULL_NAME} PROPERTIES FOLDER ${NETCODEIO_FOLDER_PREFIX}/Tests)
+
+	# Little trick in order to avoid the #include <netcode.c> in test.c. This is done in order to make sure premake build remain untouched
+	TARGET_COMPILE_DEFINITIONS(${TEST_FULL_NAME} PRIVATE "-DNETCODE_CMAKE_TEST")
+
+	# Register the test
+	ADD_TEST(NAME ${TEST_FULL_NAME} COMMAND ${TEST_FULL_NAME})
+ENDMACRO()
+
+# Because tests are in the netcode.c file, the target needs to enable the tests at build time to correctly define symbols
+TARGET_COMPILE_DEFINITIONS(${NETCODEIO_TARGET} PRIVATE "-DNETCODE_ENABLE_TESTS")
+
+ENABLE_TESTING()
+
+NETCODDEIO_ADD_TEST(test)
