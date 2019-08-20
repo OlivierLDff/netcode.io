@@ -70,14 +70,6 @@ install(
     FILES_MATCHING PATTERN "*.h"
 )
 
-# Export headers:
-#   ${NETCODEIO_HEADERS}
-#install(
-#    FILES
-#        ${NETCODEIO_HEADERS}
-#    DESTINATION "${include_install_dir}"
-#)
-
 # Config
 #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
 #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
