@@ -98,10 +98,12 @@ FetchContent_Declare(
     GIT_TAG        ${SODIUM_TAG}
 )
 
+SET(SODIUM_FOLDER_PREFIX "Dependencies/libsodium" CACHE STRING "")
+
 SET(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 SET(FETCHCONTENT_QUIET OFF)
 
-# Make all dependancies avaiables
+# Make all dependencies avaiables
 FetchContent_MakeAvailable(libsodium)
 
 # ┌──────────────────────────────────────────────────────────────────┐
