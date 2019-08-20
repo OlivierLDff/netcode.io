@@ -15,11 +15,11 @@ MACRO(NETCODDEIO_ADD_TEST TEST_NAME)
     TARGET_LINK_LIBRARIES(${TEST_FULL_NAME} ${NETCODEIO_TARGET})
     SET_TARGET_PROPERTIES(${TEST_FULL_NAME} PROPERTIES FOLDER ${NETCODEIO_FOLDER_PREFIX}/Tests)
 
-	# Little trick in order to avoid the #include <netcode.c> in test.c. This is done in order to make sure premake build remain untouched
-	TARGET_COMPILE_DEFINITIONS(${TEST_FULL_NAME} PRIVATE "-DNETCODE_CMAKE_TEST")
+    # Little trick in order to avoid the #include <netcode.c> in test.c. This is done in order to make sure premake build remain untouched
+    TARGET_COMPILE_DEFINITIONS(${TEST_FULL_NAME} PRIVATE "-DNETCODE_CMAKE_TEST")
 
-	# Register the test
-	ADD_TEST(NAME ${TEST_FULL_NAME} COMMAND ${TEST_FULL_NAME})
+    # Register the test
+    ADD_TEST(NAME ${TEST_FULL_NAME} COMMAND ${TEST_FULL_NAME})
 ENDMACRO()
 
 # Because tests are in the netcode.c file, the target needs to enable the tests at build time to correctly define symbols
