@@ -20,7 +20,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.11 )
 # DEPENDANCIES
 
 SET( SODIUM_REPOSITORY "https://github.com/OlivierLDff/libsodium" CACHE STRING "Repository of libsodium" )
-SET( SODIUM_TAG "master" CACHE STRING "Git Tag of libsodium" )
+SET( SODIUM_TAG "stable" CACHE STRING "Git Tag of libsodium" )
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │                       PROJECT SETTINGS                           │
