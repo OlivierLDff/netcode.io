@@ -32,7 +32,9 @@
 #include <time.h>
 
 #ifdef _MSC_VER
-#define SODIUM_STATIC
+#ifndef SODIUM_STATIC
+# define SODIUM_STATIC
+#endif
 #pragma warning(disable:4996)
 #endif // #ifdef _MSC_VER
 
